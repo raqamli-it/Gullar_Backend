@@ -2,8 +2,8 @@ from rest_framework import generics
 from rest_framework.response import Response
 from .models import Flowers, Category, FlowersType
 from .serializers import FlowersSerializer, CategorySerializer, CategoryListSerializer, FlowersTypeListSerializer, \
-    FlowersTypeDetailSerializer, MarketListSerializer, MarketDetailSerializer
-
+    FlowersTypeDetailSerializer, MarketListSerializer, MarketDetailSerializer, FlowerDetailSerializer
+from django.db.models import F, Case, When
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -26,6 +26,7 @@ class FlowersTypeDetail(generics.RetrieveAPIView):
     serializer_class = FlowersTypeDetailSerializer
     queryset = FlowersType.objects.all()
     lookup_field = 'id'
+
 
 
 class CategoryView(generics.ListAPIView):
@@ -65,3 +66,8 @@ class MarketDetailView(generics.RetrieveAPIView):
 
     # def get_queryset(self):
     #     return User.objects.filter(role='market')
+
+class FlowerDetailView(generics.RetrieveAPIView):
+    queryset =Flowers.objects.all()
+    serializer_class = FlowerDetailSerializer
+    lookup_field = 'id'

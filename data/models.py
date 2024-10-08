@@ -32,11 +32,11 @@ class FlowersType(models.Model):
 
 class Flowers(models.Model):
     market = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True,
-                               related_name='market')
+                               related_name='flowers')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, blank=True, null=True,
-                                 related_name='category')
+                                 related_name='flowers')
     flowers_type = models.ForeignKey(FlowersType, on_delete=models.SET_NULL, blank=True, null=True,
-                                     related_name='flowers_type')
+                                     related_name='flowers')
     title = models.CharField(max_length=100)
     image = models.ImageField(upload_to='flowers/')
     price_old = models.DecimalField(max_digits=10, decimal_places=2)
