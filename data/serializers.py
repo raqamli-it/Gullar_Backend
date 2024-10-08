@@ -126,7 +126,7 @@ class MarketListSerializer(serializers.ModelSerializer):
 
 
 class MarketDetailSerializer(serializers.ModelSerializer):
-    flowers = FlowersSerializer(many=True, read_only=True, source='flowers')
+    flowers = FlowersSerializer(many=True, read_only=True)
 
     class Meta:
         model = User
