@@ -18,7 +18,7 @@ class ReadyFlowers(generics.ListAPIView):
 
 class CategoryDetail(generics.RetrieveAPIView):
     serializer_class = FlowersTypeDetailSerializer
-    queryset = FlowersType.objects.all()
+    queryset = Category.objects.all()
     lookup_field = 'id'
 
 
@@ -48,7 +48,7 @@ class CategoryListView(generics.ListAPIView):
 
 
 class FlowersTypeListView(generics.ListAPIView):
-    queryset = Category.objects.all()  # Barcha kategoriyalarni olish
+    queryset = FlowersType.objects.all()  # Barcha kategoriyalarni olish
     serializer_class = FlowersTypeListSerializer
 
 

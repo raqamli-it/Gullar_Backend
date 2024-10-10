@@ -82,23 +82,23 @@ WSGI_APPLICATION = 'Gullar.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'gullar_db',
-#         'USER': 'gullar_user',
-#         'PASSWORD': 'gullar_password',
-#         'HOST': 'gullar_db',
-#         'PORT': '5432',  # Mahalliy port (Docker Compose faylidan)
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'gullar_db',
+        'USER': 'gullar_user',
+        'PASSWORD': 'gullar_password',
+        'HOST': 'gullar_db',
+        'PORT': '5432',  # Mahalliy port (Docker Compose faylidan)
+    }
+}
 
 
 # Password validation
