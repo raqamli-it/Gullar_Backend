@@ -122,7 +122,7 @@ class MarketListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['full_name', 'image']
+        fields = ['id', 'full_name', 'image', 'is_open']
 
 
 class MarketDetailSerializer(serializers.ModelSerializer):
@@ -130,4 +130,4 @@ class MarketDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['full_name', 'desc', 'avatar', 'flowers']
+        fields = ['full_name', 'desc', 'avatar', 'flowers', 'is_open']

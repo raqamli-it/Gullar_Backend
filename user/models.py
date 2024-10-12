@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-
+from django.utils import timezone
+import pytz
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -49,10 +50,35 @@ class AbstractUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    open_time = models.TimeField(null=True, blank=True)  # Ochilish vaqti
+    close_time = models.TimeField(null=True, blank=True)  # Yopilish vaqti
+
+
+
     objects = UserManager()
 
     USERNAME_FIELD = 'phone'
     REQUIRED_FIELDS = ['full_name']
+
+    @property
+    def is_open(self):
+        """
+        Market ochiq yoki yopiq ekanligini soat va minut bo'yicha tekshiradi
+        """
+        # O'zbekiston vaqt zonasini olish
+        uzbekistan_tz = pytz.timezone('Asia/Tashkent')
+        current_time = timezone.now().astimezone(uzbekistan_tz).time()
+
+        # Agar rol 'market' bo'lsa va open_time yoki close_time None bo'lsa, True qaytar
+        if self.role == 'market':
+            if self.open_time is None or self.close_time is None:
+                return True
+
+            # Faqat soat va minut bo'yicha tekshirish
+            if self.open_time <= current_time <= self.close_time:
+                return True
+
+        return False
 
     def __str__(self):
         return f"{self.full_name} | {self.phone}"
