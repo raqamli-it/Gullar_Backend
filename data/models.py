@@ -17,6 +17,19 @@ class Category(models.Model):
         verbose_name_plural = 'Categorys'
 
 
+class CategoryType(models.Model):
+    image = models.ImageField(upload_to='category/', null=True, blank=True)
+    title = models.CharField(max_length=50, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = 'Category Type'
+        verbose_name_plural = 'Category Types'
+
+
 class FlowersType(models.Model):
     image = models.ImageField(upload_to='flowers_type/', null=True, blank=True)
     title = models.CharField(max_length=50, null=True, blank=True)
@@ -34,6 +47,8 @@ class Flowers(models.Model):
     market = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True,
                                related_name='flowers')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, blank=True, null=True,
+                                 related_name='flowers')
+    category_type = models.ForeignKey(CategoryType, on_delete=models.SET_NULL, blank=True, null=True,
                                  related_name='flowers')
     flowers_type = models.ForeignKey(FlowersType, on_delete=models.SET_NULL, blank=True, null=True,
                                      related_name='flowers')
@@ -58,3 +73,21 @@ class Flowers(models.Model):
     class Meta:
         verbose_name = 'Flower'
         verbose_name_plural = 'Flowers'
+
+
+class News(models.Model):
+    market = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True,
+                               related_name='news')
+    title = models.CharField(max_length=50)
+    image = models.ImageField(upload_to='news/')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = 'New'
+        verbose_name_plural = 'News'
+
+
+

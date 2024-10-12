@@ -3,7 +3,7 @@ from django.db.models import F
 from django.db.models.functions import Coalesce
 
 from user.models import UserImage
-from .models import Flowers, Category, FlowersType
+from .models import Flowers, Category, FlowersType, CategoryType, News
 from django.contrib.auth import get_user_model
 
 from .pagination import FlowersPagination
@@ -11,10 +11,20 @@ from .pagination import FlowersPagination
 User = get_user_model()
 
 
+# Flower
+
 class FlowersSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
     class Meta:
         model = Flowers
         fields = ['id', 'title', 'image', 'price_old', 'price_new', 'discount', 'discount_percent']
+
+    def get_image(self, obj):
+        request = self.context.get('request')  # request obyektini olamiz
+        if obj.image:
+            return request.build_absolute_uri(obj.image.url)  # to'liq URL yaratamiz
+        return None
 
 
 class MarketSerializer(serializers.ModelSerializer):
@@ -30,6 +40,51 @@ class FlowerDetailSerializer(serializers.ModelSerializer):
         model = Flowers
         fields = ['id', 'image', 'title', 'price_old', 'price_new', 'discount', 'discount_percent', 'delivery_time',
                   'delivery_price', 'product_composition', 'desc', 'height', 'width', 'market']
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    flowers = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Category
+        fields = ['id', 'title', 'flowers']
+
+    def get_flowers(self, obj):
+        flowers = obj.flowers.all().order_by('-created_at')[:4]
+        return FlowersSerializer(flowers, many=True, context=self.context).data
+
+
+class CategoryDetailSerializer(serializers.ModelSerializer):
+    flowers = FlowersSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = FlowersType
+        fields = ['id', 'title', 'flowers']
+
+
+# Category Type
+
+
+class CategoryTypeListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CategoryType
+        fields = ['id', 'title', 'image']
+
+
+class CategoryTypeDetailSerializer(serializers.ModelSerializer):
+    flowers = FlowersSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = FlowersType
+        fields = ['id', 'title', 'flowers']
+
+
+# Flowers Type
+
+class FlowersTypeListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FlowersType
+        fields = ['id', 'title', 'image']
 
 
 class FlowersTypeDetailSerializer(serializers.ModelSerializer):
@@ -73,42 +128,12 @@ class FlowersTypeDetailSerializer(serializers.ModelSerializer):
         paginator = FlowersPagination()
         page = paginator.paginate_queryset(flowers_queryset, self.context['request'])
         if page is not None:
-            return paginator.get_paginated_response(FlowersSerializer(page, many=True).data).data
+            return paginator.get_paginated_response(FlowersSerializer(page, many=True, context=self.context).data).data
 
-        return FlowersSerializer(flowers_queryset, many=True).data
-
-
-class CategoryDetailSerializer(serializers.ModelSerializer):
-    flowers = FlowersSerializer(many=True, read_only=True, source='flowers')
-
-    class Meta:
-        model = FlowersType
-        fields = ['id', 'title', 'flowers']
+        return FlowersSerializer(flowers_queryset, many=True, context=self.context).data
 
 
-class CategorySerializer(serializers.ModelSerializer):
-    flowers = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Category
-        fields = ['id', 'title', 'flowers']
-
-    def get_flowers(self, obj):
-        flowers = obj.flowers.all().order_by('-created_at')[:4]
-        return FlowersSerializer(flowers, many=True).data
-
-
-# listlar
-class CategoryListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Category
-        fields = ['id', 'title', 'image']
-
-
-class FlowersTypeListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = FlowersType
-        fields = ['id', 'title', 'image']
+# Market
 
 
 class MarketImageSerializer(serializers.ModelSerializer):
@@ -131,3 +156,11 @@ class MarketDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['full_name', 'desc', 'avatar', 'flowers', 'is_open']
+
+
+# News
+
+class NewsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = News
+        fields = ['id', 'title', 'image', 'market']

@@ -1,11 +1,13 @@
 from django.urls import path
-from .views import CategoryDetail, FlowersTypeDetail, CategoryView, CategoryListView, \
-    FlowersTypeListView, ReadyFlowers, MarketListView, MarketDetailView, FlowerDetailView
+from .views import CategoryDetail, FlowersTypeDetail, CategoryView, CategoryTypeListView, \
+    FlowersTypeListView, ReadyFlowers, MarketListView, MarketDetailView, FlowerDetailView, CategoryTypeDetail, NewsListView
 
 urlpatterns = [
     path('ready-flowers/', ReadyFlowers.as_view()),
+    path('news/', NewsListView.as_view()),
     path('categories/', CategoryView.as_view()),
-    path('categories/list', CategoryListView.as_view()),
+    path('category-type/list', CategoryTypeListView.as_view()),
+    path('category-type/detail/<int:id>/', CategoryTypeDetail.as_view()),
     path('category/detail/<int:id>/', CategoryDetail.as_view()),
     path('flowers-type/list', FlowersTypeListView.as_view()),
     path('flowers-type/detail/<int:id>/', FlowersTypeDetail.as_view()),
