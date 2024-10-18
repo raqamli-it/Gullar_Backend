@@ -3,7 +3,7 @@ from django.db.models import F
 from django.db.models.functions import Coalesce
 
 from user.models import UserImage
-from .models import Flowers, Category, FlowersType, CategoryType, News
+from .models import Flowers, Category, FlowersType, CategoryType, News, Favorite
 from django.contrib.auth import get_user_model
 
 from .pagination import FlowersPagination
@@ -18,6 +18,9 @@ def get_flowers_for_object(obj, context):
     date = request.query_params.get('date', None)
     premium = request.query_params.get('premium', None)
     cheap = request.query_params.get('cheap', None)
+    min_price = request.query_params.get('min_price', None)
+    max_price = request.query_params.get('max_price', None)
+
     flowers_queryset = obj.flowers.all()
 
     if ready is not None:
@@ -28,6 +31,19 @@ def get_flowers_for_object(obj, context):
 
     if date is not None:
         flowers_queryset = flowers_queryset.order_by('-created_at')
+
+    if min_price is not None or max_price is not None:
+        # price_new yoki price_old bilan narxni qo'shish va filtr qilish
+        flowers_queryset = flowers_queryset.annotate(
+            price=Coalesce('price_new', F('price_old'))
+        )
+
+        # min_price va max_price ni qo'llash
+        if min_price is not None:
+            flowers_queryset = flowers_queryset.filter(price__gte=min_price)
+
+        if max_price is not None:
+            flowers_queryset = flowers_queryset.filter(price__lte=max_price)
 
     if premium is not None and cheap is None:
         flowers_queryset = flowers_queryset.annotate(
@@ -176,3 +192,13 @@ class NewsSerializer(serializers.ModelSerializer):
     class Meta:
         model = News
         fields = ['id', 'title', 'image', 'market']
+
+
+# Favorite
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    flower = FlowersSerializer()
+
+    class Meta:
+        model = Favorite
+        fields = ['id', 'flower', 'user', 'anonymous_user_id']

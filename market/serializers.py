@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
+from data.models import Favorite
+
 User = get_user_model()
 
 
@@ -41,14 +43,25 @@ class MarketLoginSerializer(serializers.Serializer):
         market = User.objects.filter(phone=phone).first()
 
         if market and market.check_password(password):
+            request = self.context.get('request')
+            self._update_anonymous_favorites(request, market)
             return market
         else:
             raise serializers.ValidationError("Invalid phone or password")
 
+    def _update_anonymous_favorites(self, request, user):
+        # Anonim foydalanuvchi ID'sini olish
+        anonymous_user_id = request.COOKIES.get('anonymous_user_id')
 
+        if anonymous_user_id:
+            # anonymous_user_id bilan bog'liq barcha sevimlilarni topamiz
+            favorites = Favorite.objects.filter(anonymous_user_id=anonymous_user_id)
 
-
-
+            if favorites.exists():
+                # bulk update: sevimlilarning barchasini bitta so'rovda yangilaymiz
+                favorites.update(user=user, anonymous_user_id=None)
+                # Cookie'dan anonymous_user_id ni o'chirib tashlaymiz
+                request.COOKIES.pop('anonymous_user_id', None)  # Cookie o'chirish
 
 
 

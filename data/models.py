@@ -90,4 +90,13 @@ class News(models.Model):
         verbose_name_plural = 'News'
 
 
+class Favorite(models.Model):
+    flower = models.ForeignKey(Flowers, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
+    anonymous_user_id = models.CharField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.flower.title} (User: {self.user}, Anonymous ID: {self.anonymous_user_id})"
+
+
 

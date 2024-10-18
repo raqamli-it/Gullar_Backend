@@ -1,9 +1,14 @@
 from rest_framework import generics
 from rest_framework.response import Response
-from .models import Flowers, Category, FlowersType, CategoryType, News
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from rest_framework.views import APIView
+
+from .models import Flowers, Category, FlowersType, CategoryType, News, Favorite
+
 from .serializers import FlowersSerializer, CategorySerializer, CategoryTypeListSerializer, FlowersTypeListSerializer, \
     FlowersTypeDetailSerializer, MarketListSerializer, MarketDetailSerializer, FlowerDetailSerializer, \
-    CategoryDetailSerializer, CategoryTypeDetailSerializer, NewsSerializer
+    CategoryDetailSerializer, CategoryTypeDetailSerializer, NewsSerializer, FavoriteSerializer
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -98,3 +103,32 @@ class NewsListView(generics.ListAPIView):
     serializer_class = NewsSerializer
 
 
+# Favorite
+
+class FavoriteViewSet(APIView):
+    def get(self, request):
+        # Anonim foydalanuvchi ID'sini olish
+        anonymous_user_id = request.COOKIES.get('anonymous_user_id')
+        if not anonymous_user_id:
+            return JsonResponse({'error': 'Anonymous user ID not found.'}, status=404)
+
+        favorites = list(Favorite.objects.filter(anonymous_user_id=anonymous_user_id).values())
+        return JsonResponse(favorites, safe=False)
+
+    @csrf_exempt
+    def post(self, request):
+        data = request.data
+        flower_id = data.get('flower')
+
+        if not flower_id:
+            return JsonResponse({'error': 'Flower ID not provided.'}, status=400)
+
+        if request.user.is_authenticated:
+            Favorite.objects.create(flower_id=flower_id, user=request.user)
+        else:
+            anonymous_user_id = request.COOKIES.get('anonymous_user_id')
+            if not anonymous_user_id:
+                return JsonResponse({'error': 'Anonymous user ID not found.'}, status=404)
+
+            Favorite.objects.create(flower_id=flower_id, anonymous_user_id=anonymous_user_id)
+        return JsonResponse({'favorite': 'create success'}, status=201)
